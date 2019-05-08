@@ -63,22 +63,25 @@ void loop(){
 if(dvalue1 < obsDistance ) 
 {
   Serial.write("NIF\n");
-  delay(1000);
+  
  if(pvalue2 > blackVal)
  { 
     Serial.write("M \n");
-  if(pvalue1 > blackVal && pvalue3 <blackVal)
+  if(pvalue1 > blackVal )
   {
     Serial.write("L \n");
+    left();
   }
-  else if (pvalue3 >blackVal && pvalue1 <blackVal)
+  else if (pvalue3 >blackVal)
     {
       Serial.write("R \n");
+      right();
     }
         else
         {
           
         Serial.write("S \n");
+        goStraight();
         }
   
  }
@@ -87,10 +90,12 @@ if(dvalue1 < obsDistance )
   if(pvalue1 > blackVal)
       {
        Serial.write("L2\n");
+       left();
       }
   if(pvalue3 > blackVal)
     {
     Serial.write("R2\n");
+    right();
     }
  
         }
@@ -99,6 +104,8 @@ if(dvalue1 < obsDistance )
 else {
   digitalWrite(light, LOW);
   stopMotor();
+  Serial.write("NN \n");
+  
 }
 
 
@@ -116,20 +123,24 @@ void goStraight(){
 
 }
 void left() {
+ for(int i = 0; i <500; i++){
  digitalWrite(leftforward, LOW);
   digitalWrite (rightforward, HIGH);
   delayMicroseconds(250);
   digitalWrite(leftforward,LOW);
   digitalWrite(rightforward, LOW);
   delayMicroseconds(750);
+ }
 }
 void right() {
+  for(int i = 0; i <500; i++){
   digitalWrite(leftforward, HIGH);
   digitalWrite (rightforward, LOW);
   delayMicroseconds(250);
   digitalWrite(leftforward,LOW);
   digitalWrite(rightforward, LOW);
   delayMicroseconds(750);
+  }
 }
 void stopMotor(){
   digitalWrite(leftforward,LOW);
