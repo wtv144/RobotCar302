@@ -1,26 +1,22 @@
-/* Use a photoresistor (or photocell) to turn on an LED in the dark
-   More info and circuit schematic: http://www.ardumotive.com/how-to-use-a-photoresistor-en.html
-   Dev: Michalis Vasilakis // Date: 8/6/2015 // www.ardumotive.com */
-   
 
 //Constants
-const int pResistor1 = A0; // Photoresistor at Arduino analog pin A0
-const int pResistor2 = A1;// Led pin at Arduino pin 9
-const int pResistor3 = A2;
+const int pResistor1 = A0; // Photoresistor at Arduino analog pin A0  LEFT
+const int pResistor2 = A1;// Led pin at Arduino pin 9 RIGHT
 
 
 
-const int dSensor1 = A3; // Distance sensors
-const int dSensor2 = A4;
-const int dSensor3 = A5;
+
+const int dSensor1 = A2; // Distance sensors
+
 
 const int leftforward = 2;      //Motor control pins
-const int leftback = 3;
-const int rightforward = 4;
-const int rightback =5;
+const int rightforward = 3;
 
-const int obsDistance = 200;    //constants used to evaluate
-const int blackVal = 750;       //800~~~
+
+const int obsDistance = 350;    //constants used to evaluate
+const int rblackVal = 450;
+            //800~~~ in dark environment (CLobby), 200-300 in bright environment (makerstudio 2nd flor)
+const int lblackVal = 450 ;
 const int light = 13;
 
 
@@ -28,19 +24,15 @@ const int light = 13;
 //Variables
 int pvalue1;          //Left resistor
 int pvalue2; //middle resistor
-int pvalue3;
+
 int dvalue1;
-int dvalue2;
-int dvalue3;
+
 
 void setup(){
  pinMode(13, OUTPUT); // Set lepPin - 9 pin as an output
  pinMode(pResistor1, INPUT);// Set pResistor - A0 pin as an input (optional)
  pinMode(pResistor2, INPUT);
- pinMode(pResistor3, INPUT);
  pinMode(dSensor1, INPUT);
- pinMode(dSensor2, INPUT);
- pinMode(dSensor3, INPUT);
  pinMode(leftforward, OUTPUT);
  pinMode(rightforward, OUTPUT);
  Serial.begin(9600);
@@ -51,68 +43,48 @@ void setup(){
 
 void loop(){
  
-  pvalue1 = analogRead(pResistor1);
-  pvalue2 = analogRead(pResistor2);
-  pvalue3 = analogRead(pResistor3);
-  dvalue1 = analogRead(dSensor1);
-  dvalue2 = analogRead(dSensor2);
-  dvalue3 = analogRead(dSensor3);
-  //You can change value "25"
-  
 
-if(dvalue1 < obsDistance ) 
-{
-  Serial.write("NIF\n");
-  
- if(pvalue2 > blackVal)
- { 
-    Serial.write("M \n");
-  if(pvalue1 > blackVal )
-  {
-    Serial.write("L \n");
-    left();
-  }
-  else if (pvalue3 >blackVal)
-    {
-      Serial.write("R \n");
-      right();
-    }
-        else
-        {
-          
-        Serial.write("S \n");
-        goStraight();
-        }
-  
- }
-
-  else{
-  if(pvalue1 > blackVal)
-      {
-       Serial.write("L2\n");
-       left();
-      }
-  if(pvalue3 > blackVal)
-    {
-    Serial.write("R2\n");
-    right();
-    }
  
-        }
-}
+ pvalue1 = analogRead(pResistor1);
+  pvalue2 = analogRead(pResistor2);
+  
+  dvalue1 = analogRead(dSensor1);
 
-else {
-  digitalWrite(light, LOW);
-  stopMotor();
-  Serial.write("NN \n");
+
+
+//You can change value "25"
+
+  
+    
+if( dvalue1< obsDistance) {
+  Serial.write("NIF \n");
+
+  if( pvalue2 > rblackVal && pvalue1 < lblackVal){
+    Serial.write("RT \n");
+    right();
+    
+  }
+  else if (pvalue2 < rblackVal && pvalue1 > lblackVal){
+    left();
+    Serial.write("LT \n");
+  }
+  else{
+    goStraight();
+    Serial.write("S \n");
+  }
+  
   
 }
 
-
+else{
+  stopMotor();
+  Serial.write("SIF \n");
+}
+ 
 }
 void goStraight(){
   
-    for(int i = 0; i <500; i++){
+    for(int i = 0; i <300; i++){
   digitalWrite(leftforward, HIGH);
   digitalWrite (rightforward, HIGH);
   delayMicroseconds(250);
@@ -123,7 +95,7 @@ void goStraight(){
 
 }
 void left() {
- for(int i = 0; i <500; i++){
+ for(int i = 0; i <100; i++){
  digitalWrite(leftforward, LOW);
   digitalWrite (rightforward, HIGH);
   delayMicroseconds(250);
@@ -133,7 +105,7 @@ void left() {
  }
 }
 void right() {
-  for(int i = 0; i <500; i++){
+  for(int i = 0; i <100; i++){
   digitalWrite(leftforward, HIGH);
   digitalWrite (rightforward, LOW);
   delayMicroseconds(250);
